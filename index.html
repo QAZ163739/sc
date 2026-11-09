@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="format-detection" content="telephone=no">
+<title>三秋盟资源地速查</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { margin: 0; background: #f4f5f7; color: #1a1d21;
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+    -webkit-font-smoothing: antialiased; }
+  header { position: sticky; top: 0; z-index: 20; background: #fff; padding: 13px 16px 10px; border-bottom: 1px solid #e8eaed; }
+  .title { font-size: 18px; font-weight: 600; letter-spacing: .5px; }
+  .sub { margin-top: 3px; font-size: 12px; color: #8a8f99; }
+  .searchwrap { position: relative; margin-top: 12px; }
+  .search { width: 100%; height: 44px; border: 1px solid #dfe2e7; border-radius: 12px;
+    padding: 0 72px 0 38px; font-size: 16px; background: #f7f8fa; outline: none;
+    transition: border-color .15s, background .15s; }
+  .search:focus { border-color: #2f6bff; background: #fff; }
+  .icon-search { position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    width: 16px; height: 16px; pointer-events: none; opacity: .55; }
+  .btn-clear { position: absolute; right: 60px; top: 50%; transform: translateY(-50%);
+    width: 22px; height: 22px; border-radius: 50%; border: none; background: #d0d5dd;
+    color: #fff; font-size: 13px; line-height: 22px; text-align: center; padding: 0;
+    display: none; cursor: pointer; }
+  .btn-go { position: absolute; right: 6px; top: 6px; height: 32px; padding: 0 14px;
+    border: none; border-radius: 9px; background: #2f6bff; color: #fff; font-size: 14px; cursor: pointer; }
+  .suggest { position: absolute; left: 0; right: 0; top: 48px; background: #fff;
+    border: 1px solid #e8eaed; border-radius: 12px; box-shadow: 0 8px 24px rgba(20,30,50,.12);
+    overflow: hidden; display: none; max-height: 46vh; overflow-y: auto;
+    -webkit-overflow-scrolling: touch; }
+  .suggest .item { padding: 11px 14px; font-size: 15px; border-bottom: 1px solid #f2f3f5;
+    display: flex; justify-content: space-between; align-items: center; }
+  .suggest .item:last-child { border-bottom: none; }
+  .suggest .item:active { background: #f2f5ff; }
+  .suggest .sname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .suggest .cnt { font-size: 12px; color: #9aa0aa; margin-left: 10px; white-space: nowrap; }
+  .tabs { display: flex; gap: 8px; margin-top: 10px; }
+  .tab { flex: 1; height: 30px; line-height: 30px; text-align: center; font-size: 13px;
+    color: #5b6270; background: #f0f2f5; border-radius: 8px; border: none; cursor: pointer; }
+  .tab.on { background: #2f6bff; color: #fff; font-weight: 500; }
+  main { padding: 12px 16px 40px; }
+  .card { background: #fff; border-radius: 14px; padding: 14px 14px 6px;
+    box-shadow: 0 1px 3px rgba(20,30,50,.05); margin-bottom: 12px; }
+  .card-head { display: flex; align-items: baseline; justify-content: space-between;
+    padding-bottom: 10px; border-bottom: 1px solid #f0f1f4; margin-bottom: 4px; }
+  .pname { font-size: 17px; font-weight: 600; word-break: break-all; }
+  .pcount { font-size: 12px; color: #8a8f99; white-space: nowrap; margin-left: 10px; }
+  .cityblock { margin-top: 10px; }
+  .citylabel { display: inline-block; font-size: 12px; color: #2f6bff; background: #eef3ff;
+    border-radius: 6px; padding: 2px 8px; margin-bottom: 8px; }
+  .row { display: flex; align-items: center; gap: 8px; padding: 9px 0; border-bottom: 1px dashed #eceef2; }
+  .row:last-child { border-bottom: none; }
+  .coord { font-size: 16px; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: .3px; }
+  .lv { font-size: 12px; color: #fff; background: #9aa4b5; border-radius: 5px; padding: 2px 7px; }
+  .lv.high { background: #e8892b; }
+  .spacer { flex: 1; }
+  .btn-copy { font-size: 12px; color: #2f6bff; background: #eef3ff; border: 1px solid #dbe6ff;
+    border-radius: 7px; padding: 5px 11px; cursor: pointer; }
+  .btn-copy:active { background: #dbe6ff; }
+  .viewbtn { font-size: 13px; color: #2f6bff; background: none; border: none; padding: 6px 4px; cursor: pointer; }
+  .hint { text-align: center; color: #9aa0aa; font-size: 13px; padding: 26px 10px 6px; line-height: 1.8; pointer-events: none; }
+  .nothing { text-align: center; padding: 30px 10px; color: #6b7280; font-size: 14px; }
+  .nothing b { display: block; color: #1a1d21; font-size: 15px; margin-bottom: 8px; }
+  .names { display: grid; grid-template-columns: repeat(auto-fill, minmax(94px, 1fr)); gap: 8px; margin-top: 10px; position: relative; z-index: 1; }
+  .nbtn { font-size: 13px; padding: 9px 6px; border-radius: 9px; background: #fff;
+    border: 1px solid #e6e9ee; color: #333; text-align: center; cursor: pointer;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .nbtn:active { background: #f2f5ff; border-color: #cddbff; }
+  .toast { position: fixed; left: 50%; bottom: 44px; transform: translateX(-50%) translateY(10px);
+    background: rgba(28,32,40,.9); color: #fff; font-size: 13px; padding: 9px 16px; border-radius: 9px;
+    opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 60; max-width: 80vw; }
+  .toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<header>
+  <div class="title">三秋盟资源地速查</div>
+  <div class="sub" id="sub"></div>
+  <div class="searchwrap">
+    <svg class="icon-search" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2">
+      <circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path>
+    </svg>
+    <input class="search" id="q" type="text" placeholder="输入游戏名字，如：零氪" autocomplete="off" enterkeyhint="search">
+    <button class="btn-clear" id="clr" onclick="clearAll()">×</button>
+    <button class="btn-go" id="go">查询</button>
+    <div class="suggest" id="sug"></div>
+  </div>
+  <div class="tabs" id="tabs"></div>
+</header>
+<main id="main"></main>
+<div class="toast" id="toast"></div>
+
+<script>
+var DATA = [["零氪","宛城","(999,675)","12级粮食"],["零氪","宛城","(1002,634)","12级粮食"],["零氪","宛城","(1007,657)","12级粮食"],["零氪","宛城","(1011,676)","12级粮食"],["零氪","宛城","(1012,686)","12级粮食"],["零氪","宛城","(1013,686)","12级粮食"],["零氪","宛城","(1018,652)","12级粮食"],["刘邦","宛城","(1024,633)","12级粮食"],["刘邦","宛城","(1033,698)","12级粮食"],["刘邦","宛城","(1036,616)","12级粮食"],["刘邦","宛城","(1037,629)","12级粮食"],["刘邦","宛城","(1037,658)","12级粮食"],["刘邦","宛城","(1040,622)","12级粮食"],["刘邦","宛城","(1044,655)","12级粮食"],["帝君","宛城","(1045,618)","12级粮食"],["帝君","宛城","(1050,581)","12级粮食"],["帝君","宛城","(1058,663)","12级粮食"],["帝君","宛城","(1059,684)","12级粮食"],["帝君","宛城","(1062,602)","12级粮食"],["帝君","宛城","(1062,622)","12级粮食"],["帝君","宛城","(1063,589)","12级粮食"],["念旧","宛城","(1071,601)","12级粮食"],["念旧","宛城","(1072,662)","12级粮食"],["念旧","宛城","(1075,628)","12级粮食"],["念旧","宛城","(1079,630)","12级粮食"],["念旧","宛城","(1080,604)","12级粮食"],["念旧","宛城","(1082,646)","12级粮食"],["念旧","宛城","(1083,643)","12级粮食"],["帝君","宛城","(1085,625)","12级粮食"],["帝君","宛城","(1089,669)","12级粮食"],["鬼货狼","宛城","(989,646)","11级粮食"],["鬼货狼","宛城","(996,640)","11级粮食"],["堂吉诃","宛城","(999,692)","11级粮食"],["堂吉诃","宛城","(1002,670)","11级粮食"],["天使飞飞","宛城","(1003,690)","11级粮食"],["天使飞飞","宛城","(1004,644)","11级粮食"],["天使飞飞","宛城","(1005,663)","11级粮食"],["天使飞飞","宛城","(1005,686)","11级粮食"],["听风丨天策","宛城","(1015,630)","11级粮食"],["叁川丨鬼手","宛城","(1016,666)","11级粮食"],["叁川丨鬼手","宛城","(1021,646)","11级粮食"],["叁川丨神童","宛城","(1021,678)","11级粮食"],["叁川丨神童","宛城","(1022,671)","11级粮食"],["驭鬼丨掌中雀","宛城","(1023,637)","11级粮食"],["驭鬼丨掌中雀","宛城","(1024,616)","11级粮食"],["龍丨珍珍","宛城","(1024,646)","11级粮食"],["听风丨小小新","宛城","(1024,670)","11级粮食"],["听风丨小小新","宛城","(1027,627)","11级粮食"],["听风丨悟空","宛城","(1030,673)","11级粮食"],["听风丨悟空","宛城","(1031,633)","11级粮食"],["听风丨听不懂","宛城","(1031,685)","11级粮食"],["听风丨听不懂","宛城","(1032,668)","11级粮食"],["布青","宛城","(1033,607)","11级粮食"],["叁川丨听风","宛城","(1034,631)","11级粮食"],["叁川丨听风","宛城","(1037,625)","11级粮食"],["宸丨周杰伦","宛城","(1040,611)","11级粮食"],["宸丨周杰伦","宛城","(1046,637)","11级粮食"],["宸丨周杰伦","宛城","(1048,592)","11级粮食"],["宸丨周杰伦","宛城","(1048,666)","11级粮食"],["宸丨黑马","宛城","(1051,657)","11级粮食"],["宸丨黑马","宛城","(1054,681)","11级粮食"],["叁川丨故里","宛城","(1055,637)","11级粮食"],["叁川丨故里","宛城","(1058,595)","11级粮食"],["听风丨御山河","宛城","(1058,619)","11级粮食"],["非酋不非","宛城","(1058,659)","11级粮食"],["少年阿宾","宛城","(1059,624)","11级粮食"],["少年阿宾","宛城","(1064,648)","11级粮食"],["宸丨王源","宛城","(1066,643)","11级粮食"],["宸丨单依纯","宛城","(1067,643)","11级粮食"],["听风丨大宝","宛城","(1069,609)","11级粮食"],["龍丨美肚莎","宛城","(1069,621)","11级粮食"],["龍丨美肚莎","宛城","(1069,645)","11级粮食"],["龍丨美肚莎","宛城","(1071,653)","11级粮食"],["龍丨咖喱酱","宛城","(1073,692)","11级粮食"],["龍丨孟三竖","宛城","(1079,610)","11级粮食"],["宸丨何润东","宛城","(1083,661)","11级粮食"],["听风丨嘉人","宛城","(1084,674)","11级粮食"],["叁川丨吉吉棒","宛城","(1092,644)","11级粮食"],["帝君","鲁阳","(880,680)","12级粮食"],["刘邦","鲁阳","(884,700)","12级粮食"],["刘邦","鲁阳","(892,671)","12级粮食"],["刘邦","鲁阳","(896,685)","12级粮食"],["零氪","鲁阳","(897,733)","12级粮食"],["零氪","鲁阳","(898,735)","12级粮食"],["零氪","鲁阳","(910,700)","12级粮食"],["念旧","鲁阳","(914,639)","12级粮食"],["念旧","鲁阳","(917,633)","12级粮食"],["念旧","鲁阳","(919,739)","12级粮食"],["星河","鲁阳","(921,631)","12级粮食"],["星河","鲁阳","(926,663)","12级粮食"],["杂鱼","鲁阳","(929,715)","12级粮食"],["南风","鲁阳","(929,735)","12级粮食"],["南风","鲁阳","(933,737)","12级粮食"],["南风","鲁阳","(935,685)","12级粮食"],["童话","鲁阳","(936,730)","12级粮食"],["童话","鲁阳","(944,654)","12级粮食"],["李逍遥","鲁阳","(949,638)","12级粮食"],["影子","鲁阳","(964,695)","12级粮食"],["影子","鲁阳","(969,654)","12级粮食"],["影子","鲁阳","(980,688)","12级粮食"],["橘狸猫","鲁阳","(982,694)","12级粮食"],["只有天知道","鲁阳","(986,702)","12级粮食"],["只有天知道","鲁阳","(993,714)","12级粮食"],["影子","鲁阳","(860,667)","11级粮食"],["影子","鲁阳","(868,671)","11级粮食"],["影子","鲁阳","(869,696)","11级粮食"],["影子","鲁阳","(871,695)","11级粮食"],["只有天知道","鲁阳","(882,715)","11级粮食"],["只有天知道","鲁阳","(891,656)","11级粮食"],["只有天知道","鲁阳","(892,722)","11级粮食"],["南风","鲁阳","(894,670)","11级粮食"],["南风","鲁阳","(897,726)","11级粮食"],["南风","鲁阳","(902,661)","11级粮食"],["南风","鲁阳","(905,737)","11级粮食"],["杂鱼","鲁阳","(909,706)","11级粮食"],["杂鱼","鲁阳","(913,670)","11级粮食"],["杂鱼","鲁阳","(913,691)","11级粮食"],["星河","鲁阳","(917,667)","11级粮食"],["星河","鲁阳","(925,714)","11级粮食"],["星河","鲁阳","(934,736)","11级粮食"],["李逍遥","鲁阳","(935,635)","11级粮食"],["李逍遥","鲁阳","(936,653)","11级粮食"],["李逍遥","鲁阳","(936,673)","11级粮食"],["大顺","鲁阳","(937,641)","11级粮食"],["大顺","鲁阳","(937,727)","11级粮食"],["大顺","鲁阳","(938,666)","11级粮食"],["皓月","鲁阳","(939,724)","11级粮食"],["皓月","鲁阳","(940,623)","11级粮食"],["皓月","鲁阳","(941,656)","11级粮食"],["宝宝巴士","鲁阳","(941,732)","11级粮食"],["宝宝巴士","鲁阳","(944,668)","11级粮食"],["宝宝巴士","鲁阳","(947,702)","11级粮食"],["工口","鲁阳","(948,677)","11级粮食"],["工口","鲁阳","(949,628)","11级粮食"],["闲庭","鲁阳","(951,715)","11级粮食"],["闲庭","鲁阳","(953,674)","11级粮食"],["万安","鲁阳","(954,682)","11级粮食"],["万安","鲁阳","(955,680)","11级粮食"],["秋寒独","鲁阳","(957,673)","11级粮食"],["秋寒独","鲁阳","(960,643)","11级粮食"],["清和池","鲁阳","(960,723)","11级粮食"],["清和池","鲁阳","(964,650)","11级粮食"],["龍丨兴漢","鲁阳","(965,655)","11级粮食"],["龍丨兴漢","鲁阳","(970,712)","11级粮食"],["叁川丨玟晗珏","鲁阳","(972,659)","11级粮食"],["叁川丨玟晗珏","鲁阳","(973,730)","11级粮食"],["青丝","鲁阳","(974,720)","11级粮食"],["青丝","鲁阳","(976,704)","11级粮食"],["铁手","鲁阳","(977,723)","11级粮食"],["铁手","鲁阳","(982,702)","11级粮食"],["橘狸猫","鲁阳","(986,697)","11级粮食"],["万安","梁县","(720,715)","12级粮食"],["万安","梁县","(722,705)","12级粮食"],["红发","梁县","(725,722)","12级粮食"],["红发","梁县","(740,716)","12级粮食"],["红发","梁县","(753,713)","12级粮食"],["秋寒独","梁县","(761,671)","12级粮食"],["秋寒独","梁县","(767,662)","12级粮食"],["皓月","梁县","(770,705)","12级粮食"],["皓月","梁县","(777,647)","12级粮食"],["皓月","梁县","(779,751)","12级粮食"],["叁川丨玟晗珏","梁县","(786,708)","12级粮食"],["闲庭","梁县","(788,709)","12级粮食"],["叁川丨玟晗珏","梁县","(788,763)","12级粮食"],["鬼货朗","梁县","(791,769)","12级粮食"],["鬼货朗","梁县","(794,650)","12级粮食"],["闲庭","梁县","(797,646)","12级粮食"],["青丝","梁县","(799,641)","12级粮食"],["青丝","梁县","(799,719)","12级粮食"],["铁手","梁县","(799,742)","12级粮食"],["铁手","梁县","(801,641)","12级粮食"],["宝宝巴士","梁县","(803,644)","12级粮食"],["宝宝巴士","梁县","(804,652)","12级粮食"],["天使飞飞","梁县","(804,659)","12级粮食"],["大顺","梁县","(806,673)","12级粮食"],["大顺","梁县","(807,643)","12级粮食"],["龍丨兴漢","梁县","(811,709)","12级粮食"],["清和池","梁县","(813,732)","12级粮食"],["清和池","梁县","(818,747)","12级粮食"],["龍丨兴漢","梁县","(821,678)","12级粮食"],["吴彦祖","梁县","(821,696)","12级粮食"],["吴彦祖","梁县","(824,709)","12级粮食"],["天使飞飞","梁县","(827,666)","12级粮食"],["工口","梁县","(830,742)","12级粮食"],["工口","梁县","(838,720)","12级粮食"],["堂吉诃德","梁县","(845,713)","12级粮食"],["堂吉诃德","梁县","(849,726)","12级粮食"],["锄禾日当午","梁县","(712,708)","11级粮食"],["锄禾日当午","梁县","(721,704)","11级粮食"],["龍丨珍珍","梁县","(722,713)","11级粮食"],["听风丨看雨","梁县","(725,709)","11级粮食"],["听风丨看雨","梁县","(729,706)","11级粮食"],["清衍","梁县","(735,712)","11级粮食"],["宸丨贾乃亮","梁县","(742,720)","11级粮食"],["叁川丨虎虎","梁县","(744,686)","11级粮食"],["叁川丨虎虎","梁县","(745,727)","11级粮食"],["叁川丨颜王","梁县","(748,681)","11级粮食"],["迪克","梁县","(749,697)","11级粮食"],["听风丨渝熙昕","梁县","(750,735)","11级粮食"],["宸丨井柏然","梁县","(759,708)","11级粮食"],["宸丨井柏然","梁县","(761,683)","11级粮食"],["听风丨皇太极","梁县","(764,681)","11级粮食"],["宸丨金城武","梁县","(769,659)","11级粮食"],["宸丨金城武","梁县","(777,716)","11级粮食"],["橡皮擦张洞","梁县","(778,686)","11级粮食"],["小落","梁县","(779,723)","11级粮食"],["宸丨柳智敏","梁县","(781,726)","11级粮食"],["荔浦车骑","梁县","(784,706)","11级粮食"],["龍丨哈吉米","梁县","(785,729)","11级粮食"],["听风丨凉冰","梁县","(788,770)","11级粮食"],["烽火连三月","梁县","(789,698)","11级粮食"],["汉月戏子陈怜","梁县","(790,650)","11级粮食"],["龍丨小甜心","梁县","(793,630)","11级粮食"],["龍丨芬达","梁县","(794,657)","11级粮食"],["莽夫","梁县","(795,657)","11级粮食"],["莽夫","梁县","(797,647)","11级粮食"],["海棠神","梁县","(798,755)","11级粮食"],["星次丨析木","梁县","(799,681)","11级粮食"],["趙雲","梁县","(800,637)","11级粮食"],["趙雲","梁县","(803,717)","11级粮食"],["龍丨白白","梁县","(803,720)","11级粮食"],["宸丨北凌","梁县","(803,747)","11级粮食"],["鬼才江艳","梁县","(806,753)","11级粮食"],["白莲丨季逢春","梁县","(807,666)","11级粮食"],["叁川丨李嘉图","梁县","(808,689)","11级粮食"],["宸丨麻将","梁县","(808,726)","11级粮食"],["宸丨麻将","梁县","(809,655)","11级粮食"],["叁川丨嘿嘿","梁县","(810,726)","11级粮食"],["宸丨赵露思","梁县","(812,707)","11级粮食"],["宸丨赵露思","梁县","(815,666)","11级粮食"],["听风丨清风丶","梁县","(817,734)","11级粮食"],["叁川丨不取名","梁县","(821,699)","11级粮食"],["听风丨玄山","梁县","(822,684)","11级粮食"],["宸丨霍建华","梁县","(825,673)","11级粮食"],["听风丨条子","梁县","(826,686)","11级粮食"],["宸丨李易峰","梁县","(827,676)","11级粮食"],["宸丨李易峰","梁县","(839,700)","11级粮食"],["叁川丨鬼手","梁县","(841,681)","11级粮食"],["诡仙丨破邪剑","梁县","(847,729)","11级粮食"],["驭鬼丨藤井风","梁县","(848,710)","11级粮食"],["宸丨泄停封","梁县","(857,689)","11级粮食"],["龍丨零克档","梁县","(857,703)","11级粮食"],["宸丨章鱼哥","梁县","(859,690)","11级粮食"]];
+var CITIES = ["宛城", "鲁阳", "梁县"];
+var MAP = {}, NAMES = [];
+DATA.forEach(function (r) {
+  if (!MAP[r[0]]) { MAP[r[0]] = []; NAMES.push(r[0]); }
+  MAP[r[0]].push({ c: r[1], coord: r[2], lv: r[3] });
+});
+var TOTAL = DATA.length;
+
+var qEl = document.getElementById("q");
+var sugEl = document.getElementById("sug");
+var mainEl = document.getElementById("main");
+var clrEl = document.getElementById("clr");
+var toastEl = document.getElementById("toast");
+var tabsEl = document.getElementById("tabs");
+document.getElementById("sub").textContent = NAMES.length + " 位玩家 · " + TOTAL + " 条资源地";
+
+var cityFilter = "全部";
+
+["全部", "宛城", "鲁阳", "梁县"].forEach(function (c) {
+  var b = document.createElement("button");
+  b.className = "tab" + (c === "全部" ? " on" : "");
+  b.textContent = c;
+  b.onclick = function () {
+    cityFilter = c;
+    Array.prototype.forEach.call(tabsEl.children, function (x) {
+      x.className = "tab" + (x.textContent === c ? " on" : "");
+    });
+    renderMain();
+  };
+  tabsEl.appendChild(b);
+});
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, function (c) {
+    if (c === "&") return "&amp;";
+    if (c === "<") return "&lt;";
+    if (c === ">") return "&gt;";
+    if (c === '"') return "&quot;";
+    return "&#39;";
+  });
+}
+function key(s) { return String(s).toLowerCase().replace(/[丨|\s·]/g, ""); }
+
+function toast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add("on");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(function () { toastEl.classList.remove("on"); }, 1700);
+}
+
+function copyText(text) {
+  function done() { toast("已复制 " + text); }
+  function manual() {
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed"; ta.style.top = "-100px";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); done(); }
+    catch (e) { toast("长按坐标可手动复制"); }
+    document.body.removeChild(ta);
+  }
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(done).catch(manual);
+  } else { manual(); }
+}
+
+function showSuggest() {
+  var raw = qEl.value.trim();
+  clrEl.style.display = raw ? "block" : "none";
+  if (!raw) { sugEl.style.display = "none"; return; }
+  var k = key(raw);
+  var found = NAMES.filter(function (n) { return key(n).indexOf(k) >= 0; }).slice(0, 8);
+  if (!found.length) { sugEl.style.display = "none"; return; }
+  sugEl.innerHTML = found.map(function (n) {
+    return '<div class="item" data-name="' + encodeURIComponent(n) + '" onclick="pick(this)">' +
+      '<span class="sname">' + esc(n) + '</span><span class="cnt">' + MAP[n].length + ' 条</span></div>';
+  }).join("");
+  sugEl.style.display = "block";
+}
+
+function fuzzy(raw, limit) {
+  var k = key(raw);
+  var out = [];
+  NAMES.forEach(function (n) {
+    var nn = key(n), s = 0;
+    if (nn === k) s = 120;
+    else if (nn.indexOf(k) === 0) s = 90 - Math.abs(nn.length - k.length);
+    else if (nn.indexOf(k) > 0) s = 70 - Math.abs(nn.length - k.length);
+    else {
+      var common = 0;
+      for (var i = 0; i < k.length; i++) if (nn.indexOf(k.charAt(i)) >= 0) common++;
+      if (k.length <= 4 && common >= 2 && common >= k.length - 1) s = common * 10;
+      else if (k.length > 4 && common >= Math.ceil(k.length * 0.8)) s = common * 8;
+    }
+    if (s > 0) out.push([n, s]);
+  });
+  out.sort(function (a, b) { return b[1] - a[1]; });
+  return out.slice(0, limit).map(function (x) { return x[0]; });
+}
+
+function playerCard(name) {
+  var items = MAP[name] || [];
+  var visible = items.filter(function (i) { return cityFilter === "全部" || i.c === cityFilter; });
+  var body = "";
+  CITIES.forEach(function (c) {
+    var g = visible.filter(function (i) { return i.c === c; });
+    if (!g.length) return;
+    body += '<div class="cityblock"><div class="citylabel">' + c + " · " + g.length + " 条</div>";
+    g.forEach(function (i) {
+      body += '<div class="row"><span class="coord">' + esc(i.coord) + "</span>" +
+        '<span class="lv' + (i.lv.indexOf("12") === 0 ? " high" : "") + '">' + esc(i.lv) + "</span>" +
+        '<span class="spacer"></span><button class="btn-copy" data-coord="' +
+        encodeURIComponent(i.coord) + '" onclick="doCopy(this)">复制坐标</button></div>';
+    });
+    body += "</div>";
+  });
+  if (!body) body = '<div class="hint">' + cityFilter + " 没有他的资源地</div>";
+  return '<div class="card"><div class="card-head"><div class="pname">' + esc(name) +
+    '</div><div class="pcount">共 ' + items.length + " 条</div></div>" + body + "</div>";
+}
+
+function renderMain() {
+  var raw = qEl.value.trim();
+  if (!raw) {
+    mainEl.innerHTML = '<div class="hint">输入游戏名字即可查询他的资源地<br>只记得一部分也能搜，例如「听风」</div>' +
+      '<div class="names">' + NAMES.map(function (n) {
+        return '<button class="nbtn" data-name="' + encodeURIComponent(n) + '" onclick="pick(this)">' + esc(n) + "</button>";
+      }).join("") + "</div>";
+    return;
+  }
+  var k = key(raw);
+  var exact = null;
+  if (MAP[raw]) exact = raw;
+  else {
+    for (var i = 0; i < NAMES.length; i++) {
+      if (key(NAMES[i]) === k) { exact = NAMES[i]; break; }
+    }
+  }
+  if (exact) { mainEl.innerHTML = playerCard(exact); return; }
+
+  var hits = fuzzy(raw, 20);
+  if (hits.length === 1) { mainEl.innerHTML = playerCard(hits[0]); return; }
+  if (hits.length > 1) {
+    mainEl.innerHTML = '<div class="card"><div class="card-head"><div class="pname">匹配到 ' + hits.length +
+      ' 位玩家</div><div class="pcount">点名字查看</div></div>' +
+      hits.map(function (n) {
+        return '<div class="row"><span class="pname" style="font-size:15px;font-weight:500">' + esc(n) +
+          '</span><span class="cnt" style="color:#9aa0aa;font-size:12px">' + MAP[n].length + ' 条</span>' +
+          '<span class="spacer"></span><button class="viewbtn" data-name="' + encodeURIComponent(n) + '" onclick="pick(this)">查看</button></div>';
+      }).join("") + "</div>";
+    return;
+  }
+  mainEl.innerHTML = '<div class="nothing"><b>没查到「' + esc(raw) + '」</b>确认一下名字有没有输错</div>';
+}
+
+function pick(el) {
+  var name = decodeURIComponent(el.getAttribute("data-name"));
+  qEl.value = name;
+  clrEl.style.display = "block";
+  sugEl.style.display = "none";
+  if (el.className.indexOf("viewbtn") >= 0) { renderMain(); return; }
+  renderMain();
+  window.scrollTo(0, 0);
+}
+function doCopy(el) {
+  copyText(decodeURIComponent(el.getAttribute("data-coord")));
+}
+qEl.addEventListener("input", function () { showSuggest(); renderMain(); });
+qEl.addEventListener("keydown", function (e) {
+  if (e.key === "Enter") { sugEl.style.display = "none"; qEl.blur(); renderMain(); }
+});
+function clearAll() {
+  qEl.value = ""; sugEl.style.display = "none"; clrEl.style.display = "none"; renderMain();
+}
+document.getElementById("go").addEventListener("click", function () {
+  sugEl.style.display = "none"; qEl.blur(); renderMain();
+});
+
+renderMain();
+</script>
+</body>
+</html>
