@@ -43,10 +43,15 @@
   main { padding: 12px 16px 40px; }
   .card { background: #fff; border-radius: 14px; padding: 14px 14px 6px;
     box-shadow: 0 1px 3px rgba(20,30,50,.05); margin-bottom: 12px; }
-  .card-head { display: flex; align-items: baseline; justify-content: space-between;
-    padding-bottom: 10px; border-bottom: 1px solid #f0f1f4; margin-bottom: 4px; }
-  .pname { font-size: 17px; font-weight: 600; word-break: break-all; }
+  .card-head { display: flex; align-items: center; justify-content: space-between;
+    gap: 8px; padding-bottom: 10px; border-bottom: 1px solid #f0f1f4; margin-bottom: 4px; }
+  .pname { font-size: 17px; font-weight: 600; flex: 1 1 auto; min-width: 0;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .pcount { font-size: 12px; color: #8a8f99; white-space: nowrap; margin-left: 10px; }
+  .btn-all { font-size: 12px; color: #fff; background: #2f6bff; border: none; border-radius: 7px;
+    padding: 6px 10px; cursor: pointer; white-space: nowrap; margin-left: auto; }
+  .btn-all:active { background: #2757d6; }
+  .card-head { gap: 8px; }
   .cityblock { margin-top: 10px; }
   .citylabel { display: inline-block; font-size: 12px; color: #2f6bff; background: #eef3ff;
     border-radius: 6px; padding: 2px 8px; margin-bottom: 8px; }
@@ -144,8 +149,8 @@ function toast(msg) {
   toast._t = setTimeout(function () { toastEl.classList.remove("on"); }, 1700);
 }
 
-function copyText(text) {
-  function done() { toast("已复制 " + text); }
+function copyText(text, msg) {
+  function done() { toast(msg || ("已复制 " + text)); }
   function manual() {
     var ta = document.createElement("textarea");
     ta.value = text;
@@ -213,7 +218,9 @@ function playerCard(name) {
   });
   if (!body) body = '<div class="hint">' + cityFilter + " 没有他的资源地</div>";
   return '<div class="card"><div class="card-head"><div class="pname">' + esc(name) +
-    '</div><div class="pcount">共 ' + items.length + " 条</div></div>" + body + "</div>";
+    '</div><button class="btn-all" data-name="' + encodeURIComponent(name) +
+    '" onclick="copyAll(this)">一键复制 ' + visible.length + '</button>' +
+    '<div class="pcount">共 ' + items.length + " 条</div></div>" + body + "</div>";
 }
 
 function renderMain() {
@@ -261,6 +268,15 @@ function pick(el) {
 }
 function doCopy(el) {
   copyText(decodeURIComponent(el.getAttribute("data-coord")));
+}
+function copyAll(el) {
+  var name = decodeURIComponent(el.getAttribute("data-name"));
+  var items = (MAP[name] || []).filter(function (i) {
+    return cityFilter === "全部" || i.c === cityFilter;
+  });
+  if (!items.length) { toast("没有可复制的坐标"); return; }
+  var text = items.map(function (i) { return i.coord; }).join("\n");
+  copyText(text, "已复制 " + items.length + " 个坐标（" + cityFilter + "）");
 }
 qEl.addEventListener("input", function () { showSuggest(); renderMain(); });
 qEl.addEventListener("keydown", function (e) {
