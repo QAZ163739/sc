@@ -3,18 +3,18 @@
     "name": "北境园区",
     "en": "THE NORTHERN DEPOT",
     "seal": "北",
-    "title": "北境园区 · 以寒为垒，以守立名"
+    "title": "北境园区 · 以战为垒，以守立名"
   },
   "hero": {
-    "eyebrow": "三国：谋定天下　·　北境驻防",
+    "eyebrow": "三国：谋定天下　·　北境园区",
     "title": "北境园区",
     "en": "BEI JING YUAN QU　·　THE NORTHERN DEPOT",
-    "sub": "以寒为垒　·　以守立名",
+    "sub": "以战为垒　·　以守立名",
     "text": "雪原尽头，自有灯火。\n一处园，一群人，一场长守。",
     "tags": [
       "第六赛季 · 风雪同程",
-      "额定 120 席",
-      "五组并肩"
+      "额定 48 席",
+      "与你同在"
     ],
     "side": "北境无雪不立 · 园区无守不存",
     "img": "bj-hero.jpg"
