@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>北境园区 · 内容后台</title>
+<style>
+  :root{
+    --ink:#0b1116; --panel:#111a21; --panel2:#16212a; --line:rgba(233,239,243,.1);
+    --gold:#c9a468; --gold2:#e0be86; --ice:#9fc4d6; --txt:#dde6ec; --dim:#8b9aa6;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--ink);color:var(--txt);
+    font:14px/1.6 "Microsoft YaHei","PingFang SC",system-ui,sans-serif}
+  a{color:var(--gold2);text-decoration:none}
+  button{font:inherit;cursor:pointer}
+  .top{
+    position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:14px;
+    padding:10px 16px;background:rgba(11,17,22,.94);border-bottom:1px solid var(--line);
+    backdrop-filter:blur(8px);flex-wrap:wrap;
+  }
+  .top .t{font-size:15px;letter-spacing:.14em;color:#fff}
+  .top .t i{font-style:normal;color:var(--gold);font-size:11px;letter-spacing:.2em;margin-left:8px}
+  .dot{width:8px;height:8px;border-radius:50%;background:#7a5b2f;box-shadow:0 0 0 3px rgba(201,164,104,.12)}
+  .dot.ok{background:#4d8f5e;box-shadow:0 0 0 3px rgba(77,143,94,.18)}
+  .dot.bad{background:#a2474a;box-shadow:0 0 0 3px rgba(162,71,74,.18)}
+  .st{font-size:12px;color:var(--dim);max-width:44vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .sp{flex:1}
+  .btn{
+    border:1px solid rgba(233,239,243,.22);background:transparent;color:var(--txt);
+    padding:7px 14px;font-size:12.5px;letter-spacing:.1em;transition:.2s;
+  }
+  .btn:hover{border-color:var(--gold);color:var(--gold2)}
+  .btn.solid{background:linear-gradient(140deg,rgba(201,164,104,.92),rgba(176,138,80,.8));color:#10161b;border-color:transparent;font-weight:600}
+  .btn.solid:hover{filter:brightness(1.08);color:#0b1116}
+  .btn.ghost{border-color:transparent;color:var(--dim);padding:7px 8px}
+  .btn.ghost:hover{color:var(--gold2)}
+
+  .wrap{display:grid;grid-template-columns:190px minmax(420px,1fr);height:calc(100% - 53px)}
+  .wrap.prev{grid-template-columns:190px minmax(360px,1fr) minmax(360px,46%)}
+  .side{border-right:1px solid var(--line);padding:16px 10px;overflow:auto;background:#0d141a}
+  .side a{display:block;padding:7px 10px;font-size:12.5px;color:var(--dim);border-left:2px solid transparent}
+  .side a:hover{color:var(--txt);background:rgba(255,255,255,.04)}
+  .side a.on{color:var(--gold2);border-left-color:var(--gold);background:rgba(201,164,104,.08)}
+  .side .tip{font-size:11px;color:#6c7b87;padding:12px 10px;border-top:1px solid var(--line);margin-top:14px;line-height:1.8}
+
+  .form{overflow:auto;padding:18px 22px 100px}
+  .panel{border:1px solid var(--line);background:var(--panel);margin-bottom:14px}
+  .panel>.hd{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,rgba(255,255,255,.03),transparent);cursor:pointer}
+  .panel>.hd b{font-size:13.5px;letter-spacing:.1em}
+  .panel>.hd span{font-size:11px;color:#6f7f8b}
+  .panel>.hd .car{margin-left:auto;color:var(--dim);font-size:12px;transition:.2s}
+  .panel>.bd{padding:14px}
+  .panel.closed>.bd{display:none}
+  .panel.closed>.hd .car{transform:rotate(-90deg)}
+
+  .field{margin:0 0 12px}
+  .field>label{display:block;font-size:11.5px;letter-spacing:.12em;color:#8fa0ac;margin-bottom:5px}
+  .field>label em{font-style:normal;color:#5f6f7b;margin-left:6px;letter-spacing:0}
+  input[type=text],textarea,select{
+    width:100%;background:#0c141a;border:1px solid rgba(233,239,243,.13);color:var(--txt);
+    padding:8px 10px;font:inherit;font-size:13px;border-radius:2px;outline:none;transition:.15s;
+  }
+  input[type=text]:focus,textarea:focus,select:focus{border-color:rgba(201,164,104,.6);background:#0e1720}
+  textarea{resize:vertical;line-height:1.85;min-height:64px}
+  .hint{font-size:11px;color:#66757f;margin-top:4px}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+
+  .card{border:1px solid var(--line);background:var(--panel2);padding:12px;margin:0 0 10px;position:relative}
+  .card .cbar{display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px dashed rgba(255,255,255,.08)}
+  .card .cbar b{font-size:12px;color:var(--gold2);letter-spacing:.08em}
+  .card .cbar span{font-size:11px;color:#7d8d99;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:40%}
+  .card .cbar .ops{margin-left:auto;display:flex;gap:4px}
+  .mini{border:1px solid rgba(255,255,255,.14);background:transparent;color:#9fb0bc;padding:2px 7px;font-size:11px}
+  .mini:hover{border-color:var(--gold);color:var(--gold2)}
+  .mini.del:hover{border-color:#c4535a;color:#e0888c}
+
+  .rows{width:100%;border-collapse:collapse}
+  .rows th{font-size:11px;color:#7d8d99;font-weight:400;text-align:left;padding:4px 6px;letter-spacing:.1em}
+  .rows td{padding:3px 4px}
+  .rows td input{font-size:12.5px;padding:5px 8px}
+  .rows tr:hover td{background:rgba(255,255,255,.02)}
+
+  .addrow{display:flex;gap:8px;margin-top:8px}
+  .empty{color:#66757f;font-size:12px;padding:8px 0}
+
+  .imgrow{display:flex;gap:12px;align-items:center;border:1px solid var(--line);padding:10px;margin-bottom:10px;background:var(--panel2)}
+  .imgrow img{width:96px;height:96px;object-fit:cover;background:#0b1116;border:1px solid var(--line)}
+  .imgrow .meta{flex:1;min-width:0}
+  .imgrow .meta b{display:block;font-size:12.5px;color:#dfe8ee}
+  .imgrow .meta code{font-size:11px;color:#7d8d99;word-break:break-all}
+  .imgrow .meta .p{font-size:11px;color:#66757f;margin-top:4px}
+
+  .preview{border-left:1px solid var(--line);background:#0a1015;display:none;flex-direction:column;position:relative}
+  .wrap.prev .preview{display:flex}
+  .preview .bar{padding:6px 10px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;font-size:11.5px;color:#7d8d99}
+  .preview iframe{flex:1;border:0;width:100%;background:#0b1116}
+  .preview .only{position:absolute;inset:38px 0 0;display:grid;place-items:center;color:#66757f;font-size:12px;background:#0a1015;z-index:2}
+  .preview.loaded .only{display:none}
+
+  /* 连接设置 */
+  .mask{position:fixed;inset:0;background:rgba(4,8,11,.72);backdrop-filter:blur(4px);display:none;z-index:40;overflow:auto}
+  .mask.on{display:block}
+  .dlg{max-width:620px;margin:8vh auto;background:var(--panel);border:1px solid rgba(201,164,104,.3);padding:26px 26px 20px}
+  .dlg h2{font-size:17px;margin:0 0 6px;letter-spacing:.12em;font-weight:600}
+  .dlg p{font-size:12.5px;color:#93a2af;line-height:1.9;margin:0 0 14px}
+  .dlg ol{font-size:12.5px;color:#93a2af;line-height:2;margin:0 0 16px;padding-left:18px}
+  .dlg ol b{color:var(--gold2);font-weight:600}
+  .dlg .row{display:flex;gap:10px}
+  .dlg .row>*{flex:1}
+  .dlg .acts{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+
+  .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(12px);opacity:0;
+    background:#16212a;border:1px solid rgba(201,164,104,.4);color:#e7eff4;padding:10px 18px;font-size:12.5px;
+    letter-spacing:.06em;transition:.25s;z-index:50;pointer-events:none;max-width:70vw}
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast.err{border-color:#a2474a;background:#2a1418}
+
+  @media (max-width:900px){
+    .wrap,.wrap.prev{grid-template-columns:1fr;height:auto}
+    .side{display:none} .preview{display:none!important}
+    .form{padding:14px 12px 80px}
+    .grid2,.grid3{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <span class="dot" id="dot"></span>
+  <span class="t">北境园区<i>内容后台</i></span>
+  <span class="st" id="status">未连接仓库</span>
+  <span class="sp"></span>
+  <button class="btn ghost" id="btnPreview">预览</button>
+  <button class="btn ghost" id="btnReload">重新载入</button>
+  <button class="btn ghost" id="btnSetup">连接设置</button>
+  <button class="btn" id="btnExport">导出备份</button>
+  <button class="btn solid" id="btnSave">保存上线</button>
+</div>
+
+<div class="wrap" id="wrap">
+  <aside class="side" id="side"></aside>
+  <section class="form" id="form">
+    <div class="panel">
+      <div class="hd"><b>先把后台接上</b><span>一次配置，之后长期有效</span></div>
+      <div class="bd">
+        <p style="font-size:12.5px;color:#93a2af;line-height:2;margin:0 0 14px">
+          这个后台直接改 GitHub 仓库里的 <code style="color:#c9a468">content.json</code>，站点每次打开都会读它。
+          所以：<b style="color:#dfe8ee">保存 → 等 1 分钟左右 GitHub 重新构建 → 刷新网页就能看到</b>。
+        </p>
+        <p style="font-size:12.5px;color:#93a2af;line-height:2;margin:0">
+          如果还没连上，点右上角「连接设置」，填一次仓库和访问令牌即可。
+        </p>
+      </div>
+    </div>
+  </section>
+  <aside class="preview" id="preview">
+    <div class="bar"><span>实时预览</span><span id="pvNote" style="color:#596873">编辑后自动刷新</span></div>
+    <div class="only">预览加载中…</div>
+    <iframe id="pv" title="预览"></iframe>
+  </aside>
+</div>
+
+<div class="mask" id="mask">
+  <div class="dlg">
+    <h2>连接 GitHub 仓库</h2>
+    <p>站点内容和图片都存在你自己的仓库里，这个后台只是帮你改它。填一次，会记在这台设备的浏览器里。</p>
+    <ol>
+      <li>打开 <b>github.com/settings/personal-access-tokens/new</b></li>
+      <li>Token name 随便写；<b>Expiration</b> 选 90 天或更长</li>
+      <li><b>Repository access</b> 选 Only select repositories → 只勾 <b id="repoNameTip">sc</b></li>
+      <li><b>Permissions</b> → Repository permissions → <b>Contents</b> 设为 Read and write</li>
+      <li>点 Generate token，把 <b>github_pat_…</b> 开头的那串复制过来</li>
+    </ol>
+    <div class="row">
+      <div class="field" style="margin-bottom:8px"><label>仓库所有者</label><input type="text" id="fOwner" placeholder="QAZ163739"></div>
+      <div class="field" style="margin-bottom:8px"><label>仓库名</label><input type="text" id="fRepo" placeholder="sc"></div>
+    </div>
+    <div class="row">
+      <div class="field" style="margin-bottom:8px"><label>分支</label><input type="text" id="fBranch" placeholder="main"></div>
+      <div class="field" style="margin-bottom:8px"><label>内容文件路径</label><input type="text" id="fPath" placeholder="content.json"></div>
+    </div>
+    <div class="field" style="margin-bottom:8px"><label>访问令牌（Token）<em>只存在本机，不上传</em></label>
+      <input type="text" id="fToken" placeholder="github_pat_xxxxxxxx" autocomplete="off" spellcheck="false"></div>
+    <div class="acts">
+      <button class="btn ghost" id="btnCancelSetup">取消</button>
+      <button class="btn solid" id="btnConnect">连接并载入</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================== 基础 ================== */
+var CFG_KEY='bj_admin_cfg_v1';
+var cfg={owner:'QAZ163739',repo:'sc',branch:'main',path:'content.json',token:''};
+var D=null;          // 当前内容
+var dirty=false;     // 是否有未保存修改
+var pvLoaded=false;
+
+var $=function(s,r){return (r||document).querySelector(s)};
+var $$=function(s,r){return [].slice.call((r||document).querySelectorAll(s))};
+
+function loadCfg(){
+  try{
+    var s=localStorage.getItem(CFG_KEY);
+    if(s){var o=JSON.parse(s); for(var k in o){ if(o[k]!=null) cfg[k]=o[k]; }}
+  }catch(e){}
+}
+function saveCfg(){ try{ localStorage.setItem(CFG_KEY,JSON.stringify(cfg)); }catch(e){} }
+
+function toast(msg,isErr){
+  var t=$('#toast'); t.textContent=msg; t.className='toast on'+(isErr?' err':'');
+  clearTimeout(toast._t); toast._t=setTimeout(function(){ t.className='toast'+(isErr?' err':'') },2600);
+}
+function setStatus(s,state){
+  $('#status').textContent=s;
+  $('#dot').className='dot'+(state?' '+state:'');
+}
+
+/* ================== GitHub API ================== */
+function apiUrl(p){ return 'https://api.github.com/repos/'+cfg.owner+'/'+cfg.repo+'/contents/'+p+'?ref='+cfg.branch; }
+function headers(){
+  return { 'Authorization':'Bearer '+cfg.token, 'Accept':'application/vnd.github+json',
+           'Content-Type':'application/json' };
+}
+function b64enc(str){
+  var bytes=new TextEncoder().encode(str), bin='';
+  for(var i=0;i<bytes.length;i++) bin+=String.fromCharCode(bytes[i]);
+  return btoa(bin);
+}
+function b64dec(b64){
+  var bin=atob(String(b64).replace(/\s/g,''));
+  var bytes=new Uint8Array(bin.length);
+  for(var i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+function bufToB64(buf){
+  var bytes=new Uint8Array(buf), parts=[], CH=0x8000;
+  for(var i=0;i<bytes.length;i+=CH) parts.push(String.fromCharCode.apply(null,bytes.subarray(i,i+CH)));
+  return btoa(parts.join(''));
+}
+function ghGetRemote(path){
+  return fetch(apiUrl(path),{headers:headers(),cache:'no-store'}).then(function(r){
+    if(r.status===404) return null;
+    if(!r.ok) throw new Error('读取失败 '+r.status);
+    return r.json();
+  });
+}
+function ghPut(path, base64, message, sha){
+  var body={message:message, content:base64, branch:cfg.branch};
+  if(sha) body.sha=sha;
+  return fetch('https://api.github.com/repos/'+cfg.owner+'/'+cfg.repo+'/contents/'+path,
+    {method:'PUT',headers:headers(),body:JSON.stringify(body)}).then(function(r){
+      if(!r.ok) return r.text().then(function(t){ throw new Error('写入失败 '+r.status+'：'+t.slice(0,120)) });
+      return r.json();
+    });
+}
+
+/* ================== 载入 ================== */
+function connect(){
+  saveCfg();
+  if(!cfg.token){ toast('还需要填访问令牌',true); return; }
+  setStatus('连接中…');
+  fetch('https://api.github.com/repos/'+cfg.owner+'/'+cfg.repo,{headers:headers(),cache:'no-store'})
+    .then(function(r){
+      if(r.status===401||r.status===403) throw new Error('令牌无效或权限不足（需要 Contents: Read and write）');
+      if(!r.ok) throw new Error('仓库读取失败 '+r.status);
+      return r.json();
+    })
+    .then(function(){ return ghGetRemote(cfg.path); })
+    .then(function(f){
+      if(!f) throw new Error('仓库里还没有 '+cfg.path);
+      D=JSON.parse(b64dec(f.content));
+      shaCache[cfg.path]=f.sha;
+      setStatus(cfg.owner+'/'+cfg.repo+' · 已连接','ok');
+      $('#mask').classList.remove('on');
+      renderAll();
+      dirty=false;
+      toast('已载入当前内容');
+    })
+    .catch(function(e){ setStatus('连接失败','bad'); toast(e.message,true); });
+}
+
+var shaCache={};
+
+/* ================== 表单生成 ================== */
+var LABELS={
+  brand:'品牌与站名', hero:'首页主视觉', bulletin:'园区公告', about:'壹 · 关于',
+  chronicles:'贰 · 战史', roster:'叁 · 名册', core:'肆 · 核心成员', hall:'伍 · 园区榜',
+  join:'陆 · 招募', thanks:'柒 · 鸣谢友军', footer:'页脚',
+  name:'名称', en:'英文名', seal:'印章字', title:'标题', eyebrow:'小标签', sub:'副标题',
+  text:'正文', tags:'标签（一行一个）', side:'侧栏竖排字', img:'图片路径',
+  kicker:'小标题（英文）', lead:'导语', items:'条目', list:'名单（一行一个）',
+  people:'人物', note:'备注', yr:'年份行', close:'结语', quote:'引语', paras:'段落（一行一个）',
+  stats:'数字', values:'理念', mgmt:'管理层', groups:'作战组', seasons:'赛季', members:'在册成员',
+  vols:'卷目', no:'编号', tag:'标签', date:'日期', brief:'短摘要', body:'正文（一行一段）',
+  season:'赛季', vol:'卷名', result:'战绩', cls:'战绩样式', event:'赛程',
+  role:'职务', big:'大字', h:'小标题', p:'正文', num:'数字', label:'说明',
+  ep:'称号', row:'行', rows:'联系方式', k:'标签', v:'内容', mono:'等宽字体',
+  id:'赛季代号', active:'默认赛季', title2:''
+};
+var FIELD_TYPES={
+  cls:{type:'select',options:[['win','问鼎'],['lose','逐鹿'],['war','备战中']]},
+  mono:{type:'bool'},
+  img:{type:'img'}
+};
+
+function lab(k){ return LABELS[k]||k }
+
+function pathGet(o,p){ var t=o; for(var i=0;i<p.length;i++){ if(t==null) return null; t=t[p[i]] } return t }
+function pathSet(o,p,v){ var t=o; for(var i=0;i<p.length-1;i++){ t=t[p[i]] } t[p[p.length-1]]=v }
+
+function isPlainObj(v){ return v && typeof v==='object' && !Array.isArray(v) }
+function isStrArr(a){ return Array.isArray(a) && a.length && typeof a[0]==='string' }
+function isObjArr(a){ return Array.isArray(a) && a.length && isPlainObj(a[0]) }
+function isRowArr(a){ return Array.isArray(a) && a.length && Array.isArray(a[0]) }
+
+/* 单字段 */
+function fieldBox(key,val,path,root){
+  var box=document.createElement('div'); box.className='field';
+  var lb=document.createElement('label'); lb.textContent=lab(key); box.appendChild(lb);
+  var ft=FIELD_TYPES[key]||{};
+  var ctl;
+
+  if(ft.type==='select'){
+    ctl=document.createElement('select');
+    ft.options.forEach(function(o){
+      var op=document.createElement('option'); op.value=o[0]; op.textContent=o[1];
+      if(val===o[0]) op.selected=true; ctl.appendChild(op);
+    });
+    ctl.addEventListener('change',function(){ pathSet(root,path,ctl.value); onChange(); });
+  }else if(ft.type==='bool'){
+    ctl=document.createElement('select');
+    [['false','否'],['true','是']].forEach(function(o){
+      var op=document.createElement('option'); op.value=o[0]; op.textContent=o[1];
+      if(String(!!val)===o[0]) op.selected=true; ctl.appendChild(op);
+    });
+    ctl.addEventListener('change',function(){ pathSet(root,path,ctl.value==='true'); onChange(); });
+  }else if(ft.type==='img'){
+    ctl=document.createElement('input'); ctl.type='text'; ctl.value=val||'';
+    ctl.addEventListener('input',function(){ pathSet(root,path,ctl.value); onChange(); });
+  }else{
+    var s=String(val==null?'':val);
+    var long=s.length>44 || s.indexOf('\n')>-1 || key==='text' || key==='body' || key==='p' || key==='brief' || key==='quote';
+    ctl=document.createElement(long?'textarea':'input');
+    if(!long) ctl.type='text';
+    ctl.value=s;
+    ctl.addEventListener('input',function(){ pathSet(root,path,ctl.value); onChange(); });
+  }
+  box.appendChild(ctl);
+
+  if(key==='body'||key==='paras') box.appendChild(hint('每行一段，可用 <strong>加粗</strong>'));
+  if(key==='members') box.appendChild(hint(''));
+  return box;
+}
+
+function hint(t){ var h=document.createElement('div'); h.className='hint'; h.textContent=t; return h }
+
+/* 对象 */
+function renderObj(container,obj,path,root,depth){
+  Object.keys(obj).forEach(function(k){
+    var v=obj[k], p=path.concat(k);
+    if(isPlainObj(v)){ container.appendChild(block(lab(k), function(bd){ renderObj(bd,v,p,root,depth+1) }, '', depth>0)); return; }
+    if(Array.isArray(v)){
+      if(isObjArr(v)){ container.appendChild(listEditor(k,v,p,root,depth)); return; }
+      if(isRowArr(v)){ container.appendChild(rowEditor(k,v,p,root)); return; }
+      if(isStrArr(v)||v.length===0){ container.appendChild(linesField(k,v,p,root)); return; }
+    }
+    container.appendChild(fieldBox(k,v,p,root));
+  });
+}
+
+/* 折叠块 */
+function block(title, build, note, closed){
+  var panel=document.createElement('div'); panel.className='panel'+(closed?' closed':'');
+  var hd=document.createElement('div'); hd.className='hd';
+  var b=document.createElement('b'); b.textContent=title;
+  hd.appendChild(b);
+  if(note){ var s=document.createElement('span'); s.textContent=note; hd.appendChild(s); }
+  var car=document.createElement('span'); car.className='car'; car.textContent='▾'; hd.appendChild(car);
+  var bd=document.createElement('div'); bd.className='bd';
+  panel.appendChild(hd); panel.appendChild(bd);
+  build(bd);
+  hd.addEventListener('click',function(){ panel.classList.toggle('closed') });
+  return panel;
+}
+
+/* 字符串数组 → 多行文本框 */
+function linesField(key,arr,path,root){
+  var box=document.createElement('div'); box.className='field';
+  var lb=document.createElement('label'); lb.textContent=lab(key); box.appendChild(lb);
+  var ta=document.createElement('textarea'); ta.value=(arr||[]).join('\n');
+  ta.style.minHeight='90px';
+  ta.addEventListener('input',function(){ pathSet(root,path,ta.value.split('\n').filter(function(x){return x!==''})); onChange(); });
+  box.appendChild(ta); box.appendChild(hint('一行一项'));
+  return box;
+}
+
+/* 对象数组 → 卡片 */
+function listEditor(key,arr,path,root,depth){
+  var outer=document.createElement('div');
+  var head=document.createElement('div'); head.className='field';
+  var lb=document.createElement('label'); lb.textContent=lab(key)+'　共 '+arr.length+' 项'; head.appendChild(lb); outer.appendChild(head);
+
+  var box=document.createElement('div'); outer.appendChild(box);
+
+  function rerender(){
+    box.innerHTML='';
+    arr.forEach(function(obj,i){
+      var card=document.createElement('div'); card.className='card';
+      var bar=document.createElement('div'); bar.className='cbar';
+      var b=document.createElement('b'); b.textContent='第 '+(i+1)+' 项'; bar.appendChild(b);
+      var s=document.createElement('span'); s.textContent=obj.title||obj.name||obj.h||obj.season||obj.no||''; bar.appendChild(s);
+      var ops=document.createElement('div'); ops.className='ops';
+      [['↑',function(){ if(i>0){ var t=arr[i-1]; arr[i-1]=arr[i]; arr[i]=t; onChange(); rerender(); } }],
+       ['↓',function(){ if(i<arr.length-1){ var t=arr[i+1]; arr[i+1]=arr[i]; arr[i]=t; onChange(); rerender(); } }],
+       ['删除',function(){ if(confirm('删除「第 '+(i+1)+' 项」？')){ arr.splice(i,1); onChange(); rerender(); } }]
+      ].forEach(function(o){
+        var btn=document.createElement('button'); btn.className='mini'+(o[0]==='删除'?' del':''); btn.textContent=o[0];
+        btn.addEventListener('click',o[1]); ops.appendChild(btn);
+      });
+      bar.appendChild(ops); card.appendChild(bar);
+      var body=document.createElement('div');
+      renderObj(body,obj,path.concat(i),root,depth+1);
+      card.appendChild(body);
+      box.appendChild(card);
+    });
+    if(!arr.length){ var e=document.createElement('div'); e.className='empty'; e.textContent='暂无内容'; box.appendChild(e); }
+  }
+
+  var add=document.createElement('button'); add.className='btn'; add.textContent='+ 添加一项';
+  add.addEventListener('click',function(){
+    var tpl={};
+    if(arr.length){ Object.keys(arr[0]).forEach(function(k){
+      var v=arr[0][k];
+      tpl[k]=Array.isArray(v)?[]:(isPlainObj(v)?{}:(typeof v==='number'?0:''));
+    }); }
+    else tpl={title:'',text:''};
+    arr.push(tpl); onChange(); rerender();
+  });
+  outer.appendChild(add);
+  rerender();
+  return outer;
+}
+
+/* 二维数组（[名字, 职务]）→ 表格 */
+function rowEditor(key,arr,path,root){
+  var outer=document.createElement('div'); outer.className='field';
+  var lb=document.createElement('label'); lb.textContent=lab(key)+'　共 '+arr.length+' 行'; outer.appendChild(lb);
+  var wrap=document.createElement('div'); outer.appendChild(wrap);
+  var cols=arr[0].length>1?arr[0].length:2;
+
+  function rerender(){
+    wrap.innerHTML='';
+    var tb=document.createElement('table'); tb.className='rows';
+    var th=document.createElement('tr');
+    for(var c=0;c<cols;c++){ var t=document.createElement('th'); t.textContent='第 '+(c+1)+' 列'; th.appendChild(t); }
+    var th0=document.createElement('th'); th0.textContent=''; th.appendChild(th0); tb.appendChild(th);
+    arr.forEach(function(row,i){
+      var tr=document.createElement('tr');
+      for(var c=0;c<cols;c++){
+        var td=document.createElement('td');
+        var inp=document.createElement('input'); inp.type='text'; inp.value=row[c]==null?'':row[c];
+        (function(cc){
+          inp.addEventListener('input',function(){ row[cc]=inp.value; onChange(); });
+        })(c);
+        td.appendChild(inp); tr.appendChild(td);
+      }
+      var td=document.createElement('td'); td.style.width='36px';
+      var del=document.createElement('button'); del.className='mini del'; del.textContent='×';
+      del.addEventListener('click',function(){ arr.splice(i,1); onChange(); rerender(); });
+      td.appendChild(del); tr.appendChild(td); tb.appendChild(tr);
+    });
+    wrap.appendChild(tb);
+  }
+  var add=document.createElement('button'); add.className='btn'; add.textContent='+ 添加一行';
+  add.style.marginTop='8px';
+  add.addEventListener('click',function(){
+    var r=[]; for(var c=0;c<cols;c++) r.push(''); arr.push(r); onChange(); rerender();
+  });
+  rerender(); outer.appendChild(add);
+  return outer;
+}
+
+/* ================== 图片区 ================== */
+function imgPanel(){
+  var panel=document.createElement('div'); panel.className='panel';
+  var hd=document.createElement('div'); hd.className='hd';
+  var b=document.createElement('b'); b.textContent='图片替换';
+  var s=document.createElement('span'); s.textContent='选图后自动压缩并上传到 media/';
+  hd.appendChild(b); hd.appendChild(s);
+  var car=document.createElement('span'); car.className='car'; car.textContent='▾'; hd.appendChild(car);
+  var bd=document.createElement('div'); bd.className='bd';
+  panel.appendChild(hd); panel.appendChild(bd);
+  hd.addEventListener('click',function(){ panel.classList.toggle('closed') });
+
+  function item(label,path,w,h){
+    var cur=pathGet(D,path);
+    var row=document.createElement('div'); row.className='imgrow';
+    var im=document.createElement('img'); im.src=cur||''; im.alt=label; row.appendChild(im);
+    var meta=document.createElement('div'); meta.className='meta';
+    var bb=document.createElement('b'); bb.textContent=label; meta.appendChild(bb);
+    var code=document.createElement('code'); code.textContent=cur||'（未设置）'; meta.appendChild(code);
+    var p=document.createElement('div'); p.className='p';
+    p.textContent='建议 '+w+'×'+h+'，会自动裁切压缩'; meta.appendChild(p);
+    row.appendChild(meta);
+    var btn=document.createElement('button'); btn.className='btn'; btn.textContent='换图';
+    row.appendChild(btn);
+    var f=document.createElement('input'); f.type='file'; f.accept='image/*'; f.style.display='none'; row.appendChild(f);
+    btn.addEventListener('click',function(){ f.click() });
+    f.addEventListener('change',function(){
+      var file=f.files&&f.files[0]; if(!file) return;
+      btn.textContent='处理中'; btn.disabled=true;
+      compress(file,w,h).then(function(b64){
+        var name='bj-up-'+Date.now()+'.jpg';
+        return uploadImg(name,b64).then(function(){
+          pathSet(D,path,name); im.src=name; code.textContent=name;
+          onChange(); toast('图片已上传，记得点保存上线');
+        });
+      }).catch(function(e){ toast(e.message||'图片处理失败',true); })
+        .then(function(){ btn.textContent='换图'; btn.disabled=false; f.value=''; });
+    });
+    return row;
+  }
+  var H=D.hero&&D.hero.img;
+  bd.appendChild(item('首页大图',['hero','img'],1600,900));
+  (D.core&&D.core.people||[]).forEach(function(p,i){
+    bd.appendChild(item('立绘 · '+p.name,['core','people',i,'img'],620,826));
+  });
+  return panel;
+}
+
+function compress(file,w,h){
+  return new Promise(function(res,rej){
+    if(!/image/.test(file.type)) { rej(new Error('请选图片文件')); return; }
+    var url=URL.createObjectURL(file), img=new Image();
+    img.onload=function(){
+      var cw=img.width, ch=img.height, ratio=Math.max(w/cw,h/ch);
+      var sw=cw*ratio, sh=ch*ratio;
+      var canvas=document.createElement('canvas'); canvas.width=w; canvas.height=h;
+      var ctx=canvas.getContext('2d');
+      ctx.drawImage(img,(w-sw)/2,(h-sh)/2,sw,sh);
+      URL.revokeObjectURL(url);
+      var data=canvas.toDataURL('image/jpeg',0.82).split(',')[1];
+      res(data);
+    };
+    img.onerror=function(){ URL.revokeObjectURL(url); rej(new Error('图片读取失败')); };
+    img.src=url;
+  });
+}
+
+function uploadImg(path,b64){
+  var msg='后台更新图片 '+path;
+  return ghGetRemote(path).then(function(ex){
+    return ghPut(path,b64,msg,ex?ex.sha:null);
+  }).then(function(r){ shaCache[path]=r.content.sha; });
+}
+
+/* ================== 总渲染 ================== */
+function renderAll(){
+  var form=$('#form'); form.innerHTML='';
+  if(!D){ return; }
+  var side=$('#side'); side.innerHTML='';
+  Object.keys(D).forEach(function(k){
+    var a=document.createElement('a'); a.textContent=lab(k); a.href='#'; side.appendChild(a);
+    a.addEventListener('click',function(e){ e.preventDefault(); var t=$( '#sec-'+k ); if(t) t.scrollIntoView({behavior:'smooth',block:'start'}); });
+  });
+  var tip=document.createElement('div'); tip.className='tip';
+  tip.innerHTML='改完点右上角 <b style="color:#c9a468">保存上线</b><br>约 1 分钟后生效<br>手机也能用这个页面';
+  side.appendChild(tip);
+
+  Object.keys(D).forEach(function(k){
+    var v=D[k];
+    if(isPlainObj(v)){
+      var panel=block(lab(k), function(bd){ renderObj(bd,v,[k],D,1) }, '', k==='footer');
+      panel.id='sec-'+k; form.appendChild(panel);
+    }
+  });
+  form.appendChild(imgPanel());
+
+  // 预览 iframe
+  var wrap=$('#wrap');
+  if(!$('#pv').getAttribute('src')) $('#pv').setAttribute('src','beijing.html');
+}
+
+function onChange(){
+  dirty=true;
+  clearTimeout(onChange._t);
+  onChange._t=setTimeout(function(){ pushPreview(); },320);
+}
+
+function pushPreview(){
+  var pv=$('#pv'); if(!pv||!pv.contentWindow) return;
+  pv.contentWindow.postMessage({__preview:D},'*');
+  $('#pvNote').textContent='已同步 · '+new Date().toLocaleTimeString();
+}
+
+/* ================== 保存 ================== */
+function save(){
+  if(!D) return;
+  if(!cfg.token){ toast('先连接仓库',true); $('#mask').classList.add('on'); return; }
+  var btn=$('#btnSave'); btn.disabled=true; btn.textContent='保存中…';
+  setStatus('提交中…');
+  var json=JSON.stringify(D,null,2);
+  ghGetRemote(cfg.path).then(function(f){
+    return ghPut(cfg.path, b64enc(json), '后台更新内容 '+new Date().toLocaleString('zh-CN'), f?f.sha:null);
+  }).then(function(r){
+    shaCache[cfg.path]=r.content.sha;
+    dirty=false;
+    setStatus('已提交 · 约 1 分钟后生效','ok');
+    toast('已保存，等 1 分钟左右刷新网页就能看到');
+    btn.disabled=false; btn.textContent='保存上线';
+  }).catch(function(e){
+    setStatus('保存失败','bad'); toast(e.message||'保存失败',true);
+    btn.disabled=false; btn.textContent='保存上线';
+  });
+}
+
+/* ================== 事件 ================== */
+$('#btnSetup').addEventListener('click',function(){
+  $('#fOwner').value=cfg.owner; $('#fRepo').value=cfg.repo;
+  $('#fBranch').value=cfg.branch; $('#fPath').value=cfg.path; $('#fToken').value=cfg.token;
+  $('#mask').classList.add('on');
+});
+$('#btnCancelSetup').addEventListener('click',function(){ $('#mask').classList.remove('on') });
+$('#btnConnect').addEventListener('click',function(){
+  cfg.owner=$('#fOwner').value.trim()||'QAZ163739';
+  cfg.repo=$('#fRepo').value.trim()||'sc';
+  cfg.branch=$('#fBranch').value.trim()||'main';
+  cfg.path=$('#fPath').value.trim()||'content.json';
+  cfg.token=$('#fToken').value.trim();
+  if(!cfg.token){ toast('令牌不能为空',true); return; }
+  $('#repoNameTip').textContent=cfg.repo;
+  connect();
+});
+$('#btnSave').addEventListener('click',save);
+$('#btnReload').addEventListener('click',function(){
+  if(dirty && !confirm('有未保存的修改，确定要重新载入并丢弃吗？')) return;
+  connect();
+});
+$('#btnPreview').addEventListener('click',function(){
+  $('#wrap').classList.toggle('prev');
+  if($('#wrap').classList.contains('prev')) setTimeout(pushPreview,300);
+});
+$('#btnExport').addEventListener('click',function(){
+  if(!D) return;
+  var blob=new Blob([JSON.stringify(D,null,2)],{type:'application/json'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='content-备份-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click(); setTimeout(function(){URL.revokeObjectURL(a.href)},1000);
+  toast('已导出备份文件');
+});
+
+$('#pv').addEventListener('load',function(){
+  $('#preview').classList.add('loaded');
+  pvLoaded=true;
+  setTimeout(pushPreview,200);
+});
+
+window.addEventListener('beforeunload',function(e){
+  if(dirty){ e.preventDefault(); e.returnValue=''; }
+});
+
+/* ================== 启动 ================== */
+loadCfg();
+if(cfg.owner) $('#repoNameTip').textContent=cfg.repo;
+setStatus(cfg.token? '已保存连接信息，点重新载入':'未连接仓库', cfg.token?'':'');
+var LOCAL_MODE=/local=1/.test(location.search);
+if(LOCAL_MODE){
+  fetch('content.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(j){
+    D=j; renderAll(); setStatus('本地预览模式（不会写入仓库）','bad');
+  }).catch(function(){ setStatus('本地读取失败','bad') });
+}else if(cfg.token){ connect(); }
+else { setTimeout(function(){ $('#mask').classList.add('on'); },400); }
+</script>
+</body>
+</html>
