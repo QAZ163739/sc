@@ -46,18 +46,8 @@ h1 .gold{color:var(--gold);}
 .chip-filter{flex:0 0 auto;border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:999px;padding:6px 13px;font-size:13px;}
 .chip-filter.on{background:rgba(143,185,220,.14);border-color:rgba(143,185,220,.5);color:var(--ice);}
 
-/* ---------- 名单列表 ---------- */
-.list{margin-top:8px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel);}
-.row{display:flex;align-items:center;gap:8px; padding:11px 12px; border-bottom:1px solid var(--line);}
-.row:last-child{border-bottom:0;}
-.row:hover{background:var(--panel2);}
-.rank{flex:0 0 auto;min-width:34px;text-align:center;font-size:12px;color:var(--ice2);font-variant-numeric:tabular-nums;}
-.rank.top{color:var(--gold);}
-.nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.tag{flex:0 0 auto;font-size:11px;color:var(--gold);border:1px solid rgba(201,168,106,.35);border-radius:6px;padding:1px 6px;}
-.cnt{flex:0 0 auto;color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums;}
-.cnt b{color:var(--text);font-weight:600;}
-.chev{flex:0 0 auto;width:12px;text-align:right;color:var(--ice2);font-size:10px;}
+/* ---------- 空状态 ---------- */
+.idle{line-height:2;}
 
 /* ---------- 详情卡 ---------- */
 .card{margin-top:12px;border:1px solid var(--line);border-radius:16px;background:var(--panel);overflow:hidden;}
@@ -93,6 +83,7 @@ h1 .gold{color:var(--gold);}
 
 .empty{margin-top:16px;padding:26px 16px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:14px;font-size:13px;}
 .empty b{color:var(--ice);}
+.empty em{display:block;margin-top:8px;font-style:normal;font-size:12px;opacity:.65;}
 
 /* ---------- 底部 ---------- */
 footer{margin-top:22px;color:#5f7085;font-size:12px;line-height:1.8;border-top:1px solid var(--line);padding-top:12px;}
@@ -114,7 +105,7 @@ footer{margin-top:22px;color:#5f7085;font-size:12px;line-height:1.8;border-top:1
   <div class="searchbox">
     <div class="field">
       <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0-6.5 6.5c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.49 4.49 0 0 1-4.5 4.5z"/></svg>
-      <input id="q" placeholder="输入游戏名字，如 五年梦 / 斩神" autocomplete="off" autocorrect="off" spellcheck="false">
+      <input id="q" placeholder="输入你的游戏名字，打两个字也行" autocomplete="off" autocorrect="off" spellcheck="false">
       <button class="clear" id="clr">清空</button>
     </div>
     <div class="filters" id="filters"></div>
@@ -191,25 +182,14 @@ function render(){
   if (kw){
     const hits = DATA.members.filter(m=>m.name.includes(kw));
     if (!hits.length){
-      out.innerHTML = `<div class="empty">没有找到「${esc(kw)}」<br>名单里共 ${DATA.members.length} 人，可只输入名字的两个字试试</div>`;
+      out.innerHTML = `<div class="empty">没有找到「${esc(kw)}」<br>可只输入名字里的两个字再试试</div>`;
       return;
     }
     state.open = new Set(hits.map(m=>m.name));
     out.innerHTML = hits.map(cardHTML).join('');
   } else {
-    out.innerHTML = `<div class="list">` + DATA.members.map(rowHTML).join('') + `</div>` +
-      DATA.members.filter(m=>state.open.has(m.name)).map(cardHTML).join('');
+    out.innerHTML = `<div class="empty idle">输入游戏名字，查看自己分到的地<br><em>共 ${DATA.members.length} 人 · ${DATA.totalParcels} 块地</em></div>`;
   }
-}
-
-function rowHTML(m){
-  const isOpen = state.open.has(m.name);
-  return `<div class="row" data-open="${esc(m.name)}">
-    <div class="rank ${m.r<=10?'top':''}">#${m.r}</div>
-    <div class="nm">${esc(m.name)}</div>
-    <div class="cnt"><b>${m.total}</b> 块</div>
-    <div class="chev">${isOpen?'▲':'▼'}</div>
-  </div>`;
 }
 
 function cardHTML(m){
@@ -272,18 +252,6 @@ document.getElementById('filters').addEventListener('click', e=>{
 });
 
 document.getElementById('out').addEventListener('click', e=>{
-  const row = e.target.closest('.row');
-  if (row){
-    const name = row.dataset.open;
-    const willOpen = !state.open.has(name);
-    if (willOpen) state.open.add(name); else state.open.delete(name);
-    render();
-    if (willOpen){
-      const card = document.querySelector(`.card[data-card="${name.replace(/\\/g,'')}"]`);
-      if (card) card.scrollIntoView({behavior:'smooth', block:'start'});
-    }
-    return;
-  }
   const chip = e.target.closest('.chip');
   if (chip){
     const [name, county, code] = chip.dataset.copy.split('|');
